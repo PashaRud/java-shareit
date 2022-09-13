@@ -1,12 +1,10 @@
 package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.StorageException;
 import ru.practicum.shareit.exception.ValidationException;
 
-import javax.validation.Valid;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
