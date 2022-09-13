@@ -54,14 +54,13 @@ public class UserServiceImpl implements UserService {
     }
 
     private void checkUserForValid(String email) {
-        if (email == null || email.isBlank() || !email.contains("@")) {
+        if(email == null || email.isBlank() || !email.contains("@")) {
             throw new ValidationException("Введен некорректный email.");
         }
-        boolean result = userDAO.getAllUsers()
+        if(!userDAO.getAllUsers()
                 .stream()
                 .map(User::getEmail)
-                .noneMatch(str -> str.equals(email));
-        if(!result) {
+                .noneMatch(str -> str.equals(email))) {
             throw new StorageException(
                     String.format("Юзер с email %s уже существует.", email));
         }
