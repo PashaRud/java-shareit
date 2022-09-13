@@ -21,9 +21,9 @@ public class ItemServiceImpl implements ItemService {
     private final UserDAO userDAO;
 
     @Override
-    public ItemDto addItem(ItemDto item, Long ownerId) {
-        Item result = ItemMapper.toItem(item, ownerId);
-        if (ItemValidator.itemIsValid(item) && userDAO.getUserById(ownerId) == null) {
+    public ItemDto addItem(ItemDto itemDto, Long ownerId) {
+        Item result = ItemMapper.toItem(itemDto, ownerId);
+        if (ItemValidator.itemIsValid(itemDto) && userDAO.getUserById(ownerId) == null) {
             throw new NotFoundException("Проблемы с валидацией вещи или не найден хозяин вещи.");
         }
 
@@ -31,19 +31,19 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto updateItem(Long ownerId, Long itemId, ItemDto item) {
+    public ItemDto updateItem(Long ownerId, Long itemId, ItemDto itemDto) {
         Item.ItemBuilder builder = itemDAO.getItem(itemId).toBuilder();
         if (!itemDAO.getItem(itemId).getOwnerId().equals(ownerId)) {
             throw new NotFoundException("Пользователь не имеет права редактировать эту вещь!");
         }
-        if (item.getName() != null) {
-            builder.name(item.getName());
+        if (itemDto.getName() != null) {
+            builder.name(itemDto.getName());
         }
-        if (item.getDescription() != null) {
-            builder.description(item.getDescription());
+        if (itemDto.getDescription() != null) {
+            builder.description(itemDto.getDescription());
         }
-        if (item.getAvailable() != null) {
-            builder.available(item.getAvailable());
+        if (itemDto.getAvailable() != null) {
+            builder.available(itemDto.getAvailable());
         }
         return ItemMapper.toItemDto(itemDAO.updateItem(itemId, builder.build()));
     }

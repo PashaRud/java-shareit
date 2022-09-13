@@ -2,7 +2,6 @@ package ru.practicum.shareit.item.DAO;
 
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.DAO.ItemDAO;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.ArrayList;
