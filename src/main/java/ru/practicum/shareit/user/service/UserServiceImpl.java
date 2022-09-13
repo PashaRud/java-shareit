@@ -1,9 +1,13 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.StorageException;
 import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.user.DAO.UserDAO;
+import ru.practicum.shareit.user.mapper.UserMapper;
+import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.model.UserDto;
 
 import java.util.Collection;
 import java.util.stream.Collectors;

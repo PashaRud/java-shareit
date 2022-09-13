@@ -1,6 +1,6 @@
 package ru.practicum.shareit.booking;
 
-import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.item.model.Item;
 
 import java.sql.Timestamp;
 

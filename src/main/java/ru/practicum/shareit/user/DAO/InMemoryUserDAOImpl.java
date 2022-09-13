@@ -1,9 +1,10 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.user.DAO;
 
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.user.utilites.UserValidator;
+import ru.practicum.shareit.user.DAO.UserDAO;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,7 +17,7 @@ public class InMemoryUserDAOImpl implements UserDAO {
 
     @Override
     public User createUser(User user) {
-       UserValidator.userIsValid(user);
+        userIsValid(user);
         user.setId(++counter);
         users.put(user.getId(), user);
         return user;
@@ -36,7 +37,7 @@ public class InMemoryUserDAOImpl implements UserDAO {
     @Override
     public User updateUser(Long userId, User user) {
         availabilityCheck(userId);
-        UserValidator.userIsValid(user);
+        userIsValid(user);
         users.put(userId, user);
         return user;
     }
@@ -47,16 +48,16 @@ public class InMemoryUserDAOImpl implements UserDAO {
         users.remove(userId);
     }
 
-    public static void userValidator(User user) {
-        if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
-            throw new ValidationException("Введен некорректный email.");
-        }
-    }
-
     private void availabilityCheck(Long userId) {
         if (!users.containsKey(userId)) {
             throw new NotFoundException(
                     String.format("Не найден юзер с id %d!", userId));
+        }
+    }
+
+    public void userIsValid(User user) {
+        if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
+            throw new ValidationException("Введен некорректный email.");
         }
     }
 }

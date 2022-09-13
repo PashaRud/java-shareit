@@ -1,7 +1,9 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.item.DAO;
 
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.DAO.ItemDAO;
+import ru.practicum.shareit.item.model.Item;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -59,7 +61,7 @@ public class InMemoryItemDAOImpl implements ItemDAO {
     private void availabilityCheck(Long itemId) {
         if (!items.containsKey(itemId)) {
             throw new NotFoundException(
-                    String.format("There are no any items with ID %d!", itemId));
+                    String.format("Нет items с ID %d!", itemId));
         }
     }
 }
