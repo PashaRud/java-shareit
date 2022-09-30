@@ -1,72 +1,59 @@
 package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.StorageException;
-import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.user.DAO.UserDAO;
 import ru.practicum.shareit.user.mapper.UserMapper;
-import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.model.UserDto;
+import ru.practicum.shareit.user.repository.UserRepository;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
+import static ru.practicum.shareit.user.mapper.UserMapper.*;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final UserDAO userDAO;
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     @Override
-    public Collection<UserDto> getUsers() {
-        return userDAO.getAllUsers()
-                .stream()
-                .map(UserMapper::toUserDto)
+    public UserDto findById(long userId) {
+        return userMapper.toUserDto(userRepository.findById(userId)
+                .orElseThrow(() -> new StorageException("Пользователя с Id = " + userId + " нет в БД")));
+    }
+
+    @Override
+    public List<UserDto> findAll() {
+        return userRepository.findAll().stream()
+                .map(user -> toUserDto(user))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public UserDto getUser(Long userId) {
-        return UserMapper.toUserDto(userDAO.getUserById(userId));
+    public UserDto save(UserDto userDto) {
+        return userMapper.toUserDto(userRepository.save(userMapper.toUser(userDto)));
     }
 
     @Override
-    public UserDto updateUser(Long userId, UserDto userDto) {
-        User user = userDAO.getUserById(userId);
-        User.UserBuilder builder = user.toBuilder();
+    public UserDto update(long userId, UserDto userDto) {
+        UserDto oldUserDto = findById(userId);
         if (userDto.getName() != null) {
-            builder.name(userDto.getName());
+            oldUserDto.setName(userDto.getName());
         }
         if (userDto.getEmail() != null) {
-            checkUserForValid(userDto.getEmail());
-            builder.email(userDto.getEmail());
+            oldUserDto.setEmail(userDto.getEmail());
         }
-        return UserMapper.toUserDto(userDAO.updateUser(userId, builder.build()));
+        return userMapper.toUserDto(userRepository.save(userMapper.toUser(oldUserDto)));
     }
 
     @Override
-    public UserDto createUser(UserDto userDto) {
-        checkUserForValid(userDto.getEmail());
-        User user = UserMapper.toUser(userDto);
-        return UserMapper.toUserDto(userDAO.createUser(user));
+    public void deleteById(long userId) {
+        userRepository.deleteById(userId);
     }
 
-    @Override
-    public void deleteUser(Long userId) {
-        userDAO.delete(userId);
-    }
-
-    private void checkUserForValid(String email) {
-        if (email == null || email.isBlank() || !email.contains("@")) {
-            throw new ValidationException("Введен некорректный email.");
-        }
-        if (!userDAO.getAllUsers()
-                .stream()
-                .map(User::getEmail)
-                .noneMatch(str -> str.equals(email))) {
-            throw new StorageException(
-                    String.format("Юзер с email %s уже существует.", email));
-        }
-    }
 }

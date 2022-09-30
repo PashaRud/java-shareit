@@ -1,16 +1,25 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
-@Data
-@Builder
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
+@Getter
+@Setter
+@Builder(toBuilder = true)
+@NoArgsConstructor
+@AllArgsConstructor
 public class ItemDto {
 
+
     private Long id;
+    @NotBlank(message = "Имя не может быть пустым")
+    @NotNull
     private String name;
+    @NotNull
+    @NotBlank(message = "Описание не может быть пустым")
     private String description;
-    private Long ownerId;
-    private Long requestId;
+    @NotNull
     private Boolean available;
 }
