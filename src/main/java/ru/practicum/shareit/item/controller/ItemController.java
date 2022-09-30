@@ -27,8 +27,8 @@ public class ItemController {
 
     @PostMapping
     public ItemDto create(@RequestHeader("X-Sharer-User-Id") long userId, @Valid @RequestBody ItemDto itemDto) {
-        log.info("Получен запрос к эндпоинту /items. Вещь: " +  itemDto.getName()
-                 + "Наименование: " + itemDto.getDescription());
+        log.info("Получен запрос к эндпоинту /items. Вещь: " + itemDto.getName()
+                + "Наименование: " + itemDto.getDescription());
         return itemService.save(itemDto, userId);
     }
 
@@ -58,7 +58,7 @@ public class ItemController {
 
     @DeleteMapping("/{id}")
     public void deleteItemById(@PathVariable long id) {
-        log.info("Удаление вещи " +id);
+        log.info("Удаление вещи " + id);
         itemService.deleteById(id);
     }
 

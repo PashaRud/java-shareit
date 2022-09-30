@@ -35,6 +35,6 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleBookingException(BookingException e) {
         log.error("Некорректный запрос" + "\n" + e.getMessage());
-        return new ErrorResponse( "incorrect request", e.getMessage());
+        return new ErrorResponse("incorrect request", e.getMessage());
     }
 }
