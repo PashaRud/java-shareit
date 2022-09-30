@@ -22,6 +22,7 @@ public class ItemController {
 
     @GetMapping
     public List<ItemDtoWithBooking> findAll(@RequestHeader("X-Sharer-User-Id") long userId) {
+        log.info("Поиск всех вещей пользователя с ID: " + userId);
         return itemService.findAll(userId);
     }
 

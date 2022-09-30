@@ -19,6 +19,7 @@ public class UserController {
 
     @GetMapping
     public List<UserDto> findAll() {
+        log.info("Получен запрос к эндпоинту: /users, метод findAll");
         return userService.findAll();
     }
 
@@ -36,6 +37,7 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     public void deleteUserById(@PathVariable long id) {
+        log.info("Получен запрос к эндпоинту: DELETE /users/id , userId " + id);
         userService.deleteById(id);
     }
 

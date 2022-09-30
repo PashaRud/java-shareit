@@ -28,6 +28,7 @@ public class BookingController {
     @GetMapping
     public List<BookingDto> findAll(@RequestHeader("X-Sharer-User-Id") long userId,
                                     @RequestParam(defaultValue = "ALL") String state) {
+        log.info("Получен запрос к эндпоинту /bookings. Метод findAll. UserId: " + userId);
         return bookingService.findAll(userId, state);
     }
 
@@ -35,13 +36,14 @@ public class BookingController {
     @GetMapping("/owner")
     public List<BookingDto> findAllByOwner(@RequestHeader("X-Sharer-User-Id") long userId,
                                            @RequestParam(defaultValue = "ALL") String state) {
+        log.info("Получен запрос к эндпоинту /owner. Метод finlAll. UserId: " + userId);
         return bookingService.findAllByItemOwnerId(userId, state);
     }
 
     @PatchMapping("/{bookingId}")
     public BookingDto approve(@RequestHeader("X-Sharer-User-Id") long userId,
                               @PathVariable long bookingId, @RequestParam Boolean approved) {
-        log.info("Получен запрос к эндпоинту /bookings, ID: " + bookingId);
+        log.info("Получен запрос к эндпоинту /bookings, UserID: " + bookingId);
         return bookingService.approve(userId, bookingId, approved);
     }
 
@@ -53,6 +55,7 @@ public class BookingController {
 
     @DeleteMapping("/{id}")
     public void deleteById(@PathVariable long id) {
+        log.info("Метод DELETE для ID " + id);
         bookingService.deleteById(id);
     }
 
