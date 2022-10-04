@@ -11,23 +11,30 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class ErrorHandler {
 
     @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handle(EmailValidateException e) {
+        log.error("ошибка валидации email-а" + "\n" + e.getMessage());
+        return new ErrorResponse("Email validation error", e.getMessage());
+    }
+
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNotFoundException(final NotFoundException e) {
-        log.info("404 {}", e.getMessage(), e);
-        return new ErrorResponse(e.getMessage());
+    public ErrorResponse handleStorageException(StorageException e) {
+        log.error("Объект не найден" + "\n" + e.getMessage());
+        return new ErrorResponse("NOT_FOUND", e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidationException(final ValidationException e) {
-        log.info("400 {}", e.getMessage(), e);
-        return new ErrorResponse(e.getMessage());
+    public ErrorResponse handleItemException(ItemException e) {
+        log.error("Item не найден" + "\n" + e.getMessage());
+        return new ErrorResponse("NOT_AVAILABLE", e.getMessage());
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse defaultHandle(final Exception e) {
-        log.info("500 {}", e.getMessage(), e);
-        return new ErrorResponse(e.getMessage());
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleBookingException(BookingException e) {
+        log.error("Некорректный запрос" + "\n" + e.getMessage());
+        return new ErrorResponse("incorrect request", e.getMessage());
     }
 }
