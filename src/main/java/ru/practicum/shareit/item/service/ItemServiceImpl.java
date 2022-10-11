@@ -2,6 +2,8 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.model.Booking;
@@ -12,6 +14,7 @@ import ru.practicum.shareit.exception.StorageException;
 import ru.practicum.shareit.item.model.*;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -32,6 +35,8 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository itemRequestRepository;
+
 
     @Override
     public ItemDtoWithBooking findById(long itemId, long userId) {
@@ -52,8 +57,10 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDtoWithBooking> findAll(long userId) {
-        List<ItemDtoWithBooking> result = itemRepository.findAll().stream()
+    public List<ItemDtoWithBooking> findAll(long userId, int from, int size) {
+        int page = from / size;
+        Pageable pageable = PageRequest.of(page, size);
+        List<ItemDtoWithBooking> result = itemRepository.findAll(pageable).stream()
                 .filter(item -> item.getOwner().getId().equals(userId))
                 .map(item -> toItemDtoWithBooking(item))
                 .collect(Collectors.toList());
@@ -90,12 +97,15 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto save(ItemDto itemDto, long userId) {
         Item item = toItem(itemDto);
-        try {
-            item.setOwner(userRepository.findById(userId).orElseThrow());
-            return toItemDto(itemRepository.save(item));
-        } catch (Exception exception) {
-            throw new StorageException("Incorrect userId");
+            item.setOwner(userRepository.findById(userId).orElseThrow(() ->
+                    new StorageException("Incorrect userId")));
+        Long requestId = itemDto.getRequestId();
+        if (requestId != null) {
+            item.setItemRequest(itemRequestRepository.findById(requestId)
+                    .orElseThrow(() -> new StorageException("Incorrect requestId")));
         }
+
+        return toItemDto(itemRepository.save(item));
     }
 
     @Override
@@ -140,7 +150,7 @@ public class ItemServiceImpl implements ItemService {
                 throw new StorageException("Incorrect userId");
             }
         } catch (Exception e) {
-            throw new StorageException("Incorrect ItemId");
+            throw new StorageException("Incorrect ItemId OUT OF TRY");
         }
     }
 
@@ -150,9 +160,11 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> searchItem(String text) {
+    public List<ItemDto> searchItem(String text, int from, int size) {
+        int page = from / size;
+        Pageable pageable = PageRequest.of(page, size);
         if (!text.isBlank()) {
-            return itemRepository.search(text)
+            return itemRepository.search(text, pageable)
                     .stream()
                     .filter(Item::getAvailable)
                     .map(item -> toItemDto(item))

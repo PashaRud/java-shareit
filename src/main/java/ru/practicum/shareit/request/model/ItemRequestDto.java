@@ -1,26 +1,25 @@
-package ru.practicum.shareit.item.model;
+package ru.practicum.shareit.request.model;
 
 import lombok.*;
+import ru.practicum.shareit.user.model.User;
 
+import javax.persistence.Column;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
-public class ItemDto {
+public class ItemRequestDto {
 
     private Long id;
-    @NotBlank(message = "Имя не может быть пустым")
-    @NotNull
-    private String name;
     @NotNull
     @NotBlank(message = "Описание не может быть пустым")
     private String description;
-    @NotNull
-    private Boolean available;
-
-    private Long requestId;
+    private LocalDateTime created;
 }

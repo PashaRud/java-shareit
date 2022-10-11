@@ -1,6 +1,8 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.model.Booking;
@@ -42,34 +44,36 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> findAll(long userId, String state) {
+    public List<BookingDto> findAll(long userId, String state, int from, int size) {
         userRepository.findById(userId).orElseThrow(() -> new StorageException("Incorrect userId"));
+        int page = from / size;
+        Pageable pageable = PageRequest.of(page, size);
         try {
             switch (Status.valueOf(state)) {
                 case ALL:
-                    return bookingRepository.findByBookerIdOrderByStartDesc(userId)
+                    return bookingRepository.findByBookerIdOrderByStartDesc(userId, pageable)
                             .stream().map(booking -> toBookingDto(booking)).collect(Collectors.toList());
                 case CURRENT:
                     return bookingRepository.findCurrentBookingsByBookerIdOrderByStartDesc(userId,
-                                    LocalDateTime.now()).stream().map(booking -> toBookingDto(booking))
+                                    LocalDateTime.now(), pageable).stream().map(booking -> toBookingDto(booking))
                             .collect(Collectors.toList());
                 case PAST:
                     return bookingRepository.findBookingsByBookerIdAndEndIsBeforeOrderByStartDesc(userId,
-                                    LocalDateTime.now()).stream().map(booking -> toBookingDto(booking))
+                                    LocalDateTime.now(), pageable).stream().map(booking -> toBookingDto(booking))
                             .collect(Collectors.toList());
                 case FUTURE:
                     return bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(userId,
-                                    LocalDateTime.now())
+                                    LocalDateTime.now(), pageable)
                             .stream()
                             .map(booking -> toBookingDto(booking)).collect(Collectors.toList());
                 case WAITING:
                     return bookingRepository.findBookingsByBookerIdAndStatusOrderByStartDesc(userId,
-                                    Status.WAITING)
+                                    Status.WAITING, pageable)
                             .stream()
                             .map(booking -> toBookingDto(booking)).collect(Collectors.toList());
                 case REJECTED:
                     return bookingRepository.findBookingsByBookerIdAndStatusOrderByStartDesc(userId,
-                                    Status.REJECTED)
+                                    Status.REJECTED, pageable)
                             .stream()
                             .map(booking -> toBookingDto(booking)).collect(Collectors.toList());
                 default:
@@ -149,9 +153,11 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> findAllByItemOwnerId(long userId, String state) {
+    public List<BookingDto> findAllByItemOwnerId(long userId, String state, int from, int size) {
         userRepository.findById(userId).orElseThrow(() -> new StorageException("Некорректный id"));
-        List<BookingDto> result = bookingRepository.searchBookingByItemOwnerId(userId).stream()
+        int page = from / size;
+        Pageable pageable = PageRequest.of(page, size);
+        List<BookingDto> result = bookingRepository.searchBookingByItemOwnerIdOrderByStartDesc(userId, pageable).stream()
                 .map(booking -> toBookingDto(booking)).collect(Collectors.toList());
         if (result.isEmpty()) {
             throw new StorageException("У пользователя нет вещей");
@@ -163,22 +169,22 @@ public class BookingServiceImpl implements BookingService {
                     return result;
                 case CURRENT:
                     return bookingRepository.findCurrentBookingsByItemOwnerIdOrderByStartDesc(userId,
-                                    LocalDateTime.now()).stream().map(booking -> toBookingDto(booking))
+                                    LocalDateTime.now(), pageable).stream().map(booking -> toBookingDto(booking))
                             .collect(Collectors.toList());
                 case PAST:
                     return bookingRepository.findBookingsByItemOwnerIdAndEndIsBeforeOrderByStartDesc(userId,
-                                    LocalDateTime.now()).stream().map(booking -> toBookingDto(booking))
+                                    LocalDateTime.now(), pageable).stream().map(booking -> toBookingDto(booking))
                             .collect(Collectors.toList());
                 case FUTURE:
                     return bookingRepository.searchBookingByItemOwnerIdAndStartIsAfterOrderByStartDesc(userId,
-                                    LocalDateTime.now()).stream().map(booking -> toBookingDto(booking))
+                                    LocalDateTime.now(), pageable).stream().map(booking -> toBookingDto(booking))
                             .collect(Collectors.toList());
                 case WAITING:
-                    return bookingRepository.findBookingsByItemOwnerIdOrderByStartDesc(userId).stream()
+                    return bookingRepository.findBookingsByItemOwnerIdOrderByStartDesc(userId, pageable).stream()
                             .filter(booking -> booking.getStatus().equals(Status.WAITING))
                             .map(booking -> toBookingDto(booking)).collect(Collectors.toList());
                 case REJECTED:
-                    return bookingRepository.findBookingsByItemOwnerIdOrderByStartDesc(userId).stream()
+                    return bookingRepository.findBookingsByItemOwnerIdOrderByStartDesc(userId, pageable).stream()
                             .filter(booking -> booking.getStatus().equals(Status.REJECTED))
                             .map(booking -> toBookingDto(booking)).collect(Collectors.toList());
                 default:

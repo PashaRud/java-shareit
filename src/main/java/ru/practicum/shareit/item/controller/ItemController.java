@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.model.CommentDto;
 import ru.practicum.shareit.item.model.ItemDtoWithBooking;
@@ -10,10 +11,13 @@ import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.model.ItemDto;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
 @Slf4j
+@Validated
 @RequiredArgsConstructor
 @RequestMapping("/items")
 public class ItemController {
@@ -21,13 +25,16 @@ public class ItemController {
     private final ItemService itemService;
 
     @GetMapping
-    public List<ItemDtoWithBooking> findAll(@RequestHeader("X-Sharer-User-Id") long userId) {
+    public List<ItemDtoWithBooking> findAll(@RequestHeader("X-Sharer-User-Id") long userId,
+                                            @PositiveOrZero @RequestParam(defaultValue = "0") int from,
+                                            @Positive @RequestParam(defaultValue = "20") int size) {
         log.info("Поиск всех вещей пользователя с ID: " + userId);
-        return itemService.findAll(userId);
+        return itemService.findAll(userId, from, size);
     }
 
     @PostMapping
-    public ItemDto create(@RequestHeader("X-Sharer-User-Id") long userId, @Valid @RequestBody ItemDto itemDto) {
+    public ItemDto create(@Valid @RequestBody ItemDto itemDto,
+                          @RequestHeader("X-Sharer-User-Id") long userId) {
         log.info("Получен запрос к эндпоинту /items. Вещь: " + itemDto.getName()
                 + "Наименование: " + itemDto.getDescription());
         return itemService.save(itemDto, userId);
@@ -64,8 +71,10 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public List<ItemDto> findItemByText(@RequestParam String text) {
+    public List<ItemDto> findItemByText(@RequestParam String text,
+                                        @PositiveOrZero @RequestParam(defaultValue = "0") int from,
+                                        @Positive @RequestParam(defaultValue = "20") int size) {
         log.info("Поиск вещи по тексту - " + text);
-        return itemService.searchItem(text);
+        return itemService.searchItem(text, from, size);
     }
 }
