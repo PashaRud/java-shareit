@@ -44,7 +44,6 @@ class UserControllerTest {
         mockMvc.perform(get("/users"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("[{\"id\": 1,\"name\": \"user\",\"email\": \"user@mail.ru\"}]"));
-
         verify(userService, times(1)).findAll();
     }
 

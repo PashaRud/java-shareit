@@ -4,11 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
 import ru.practicum.shareit.booking.enums.Status;
-import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.StorageException;
-import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.*;
 import ru.practicum.shareit.item.repository.CommentRepository;
@@ -26,6 +24,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static ru.practicum.shareit.item.mapper.CommentMapper.toCommentDto;
 
 class ItemServiceImplTest {
 
@@ -36,7 +35,6 @@ class ItemServiceImplTest {
     private ItemRequestRepository itemRequestRepository;
     private BookingRepository bookingRepository;
     private CommentRepository commentRepository;
-    private CommentMapper commentMapper;
 
     @BeforeEach
     void beforeEach() {
@@ -46,8 +44,6 @@ class ItemServiceImplTest {
         commentRepository = mock(CommentRepository.class);
         itemRequestRepository = mock(ItemRequestRepository.class);
         itemMapper = new ItemMapper();
-        BookingMapper bookingMapper = new BookingMapper();
-        commentMapper = new CommentMapper();
         itemService = new ItemServiceImpl(itemRepository, userRepository, bookingRepository,
                 commentRepository, itemRequestRepository);
     }
@@ -131,7 +127,7 @@ class ItemServiceImplTest {
                 .thenReturn(bookingsList);
         when(commentRepository.save(comment))
                 .thenReturn(comment);
-        CommentDto commentDto1 = commentMapper.toCommentDto(comment);
+        CommentDto commentDto1 = toCommentDto(comment);
         CommentDto commentDto = itemService.saveComment(userWriteComment.getId(), item.getId(),
                 commentDto1);
         assertNotNull(commentDto);
@@ -146,7 +142,7 @@ class ItemServiceImplTest {
         Item item = createItem();
         User userWriteComment = item.getItemRequest().getUser();
         Comment comment = createComment(item, userWriteComment);
-        CommentDto commentDto = commentMapper.toCommentDto(comment);
+        CommentDto commentDto = toCommentDto(comment);
         long incorrectUserId = 10L;
         Throwable thrown = assertThrows(StorageException.class,
                 () -> itemService.saveComment(incorrectUserId,
@@ -159,7 +155,7 @@ class ItemServiceImplTest {
         Item item = createItem();
         User userWriteComment = item.getItemRequest().getUser();
         Comment comment = createComment(item, userWriteComment);
-        CommentDto commentDto = commentMapper.toCommentDto(comment);
+        CommentDto commentDto = toCommentDto(comment);
         long incorrectItemId = 10L;
         Throwable thrown2 = assertThrows(StorageException.class,
                 () -> itemService.saveComment(userWriteComment.getId(),
