@@ -60,8 +60,7 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDtoWithBooking> findAll(long userId, int from, int size) {
         int page = from / size;
         Pageable pageable = PageRequest.of(page, size);
-        List<ItemDtoWithBooking> result = itemRepository.findAll(pageable).stream()
-                .filter(item -> item.getOwner().getId().equals(userId))
+        List<ItemDtoWithBooking> result = itemRepository.findByOwnerId(userId, pageable).stream()
                 .map(item -> toItemDtoWithBooking(item))
                 .collect(Collectors.toList());
         for (ItemDtoWithBooking itemDtoWithBooking : result) {
@@ -110,22 +109,21 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public CommentDto saveComment(long userId, long itemId, CommentDto commentDto) {
-        Optional<Item> itemTemp = itemRepository.findById(itemId);
-        if (!itemTemp.isPresent()) {
-            throw new StorageException("Отсутствует Item");
-        }
-        Optional<User> userTemp = userRepository.findById(userId);
-        if (!userTemp.isPresent()) {
-            throw new StorageException("Отсутствует пользователь");
-        }
-        if (bookingRepository.searchBookingByBookerIdAndItemIdAndEndIsBefore(userId, itemId, LocalDateTime.now())
-                .stream().noneMatch(booking -> booking.getStatus().equals(Status.APPROVED))) {
+        Item item = itemRepository.findById(itemId).orElseThrow(() ->
+                new StorageException("Вещи с Id = " + itemId + " нет в БД"));
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new StorageException("Пользователя с Id = " + userId + " нет в БД"));
+        List<Booking> bookings = bookingRepository
+                .searchBookingByBookerIdAndItemIdAndEndIsBeforeAndStatus(userId, itemId,
+                        LocalDateTime.now(), Status.APPROVED);
+        if (bookings.isEmpty()) {
             throw new BookingException("Пользователь с Id = " + userId + " не брал в аренду вещь с Id = " + itemId);
         }
         Comment comment = toComment(commentDto);
-        comment.setItem(itemTemp.get());
-        comment.setAuthor(userTemp.get());
-        return toCommentDto(commentRepository.save(comment));
+        comment.setItem(item);
+        comment.setAuthor(user);
+        commentRepository.save(comment);
+        return toCommentDto(comment);
     }
 
     @Override
