@@ -70,15 +70,15 @@ class ItemRequestServiceImplTest {
         when(userRepository.findById(itemRequest.getUser().getId()))
                 .thenReturn(Optional.of(itemRequest.getUser()));
         when(itemRequestRepository
-                .findAllByRequestorIdOrderByCreatedDesc(itemRequest.getUser().getId()))
+                .findAllByUserIdOrderByCreatedDesc(itemRequest.getUser().getId()))
                 .thenReturn(Collections.singletonList(itemRequest));
         final List<ItemRequestDtoWithItems> itemRequestDtoWithItems = itemRequestService
                 .findAll(itemRequest.getUser().getId());
         assertNotNull(itemRequestDtoWithItems);
-        assertEquals(0, itemRequestDtoWithItems.size());
+        assertEquals(1, itemRequestDtoWithItems.size());
         assertEquals(itemRequest.getDescription(), itemRequestDtoWithItems.get(0).getDescription());
         verify(itemRequestRepository, times(1))
-                .findAllByRequestorIdOrderByCreatedDesc(itemRequest.getUser().getId());
+                .findAllByUserIdOrderByCreatedDesc(itemRequest.getUser().getId());
     }
 
     @Test

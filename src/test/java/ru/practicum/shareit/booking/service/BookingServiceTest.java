@@ -2,8 +2,6 @@ package ru.practicum.shareit.booking.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-//import org.springframework.data.domain.PageRequest;
-//import org.springframework.data.domain.Sort;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingDto;
 import ru.practicum.shareit.booking.repository.BookingRepository;
@@ -15,8 +13,6 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
-//import java.util.Collections;
-//import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;

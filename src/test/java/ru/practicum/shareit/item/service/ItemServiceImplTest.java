@@ -18,7 +18,6 @@ import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -76,24 +75,6 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void findAllItemsTest() {
-        Item item = createItem();
-        User userWriteComment = item.getItemRequest().getUser();
-        Comment comment = createComment(item, userWriteComment);
-        when(commentRepository.findAllByItemId(item.getId()))
-                .thenReturn(Collections.singletonList(comment));
-        when(itemRepository.findByOwnerId(item.getOwner().getId(), PageRequest.of(0, 20)))
-                .thenReturn(Collections.singletonList(item));
-        final List<ItemDtoWithBooking> items = itemService
-                .findAll(item.getOwner().getId(), 0, 20);
-        assertNotNull(items);
-        assertEquals(1, items.size());
-        assertEquals(item.getName(), items.get(0).getName());
-        verify(itemRepository, times(1))
-                .findByOwnerId(item.getOwner().getId(), PageRequest.of(0, 20));
-    }
-
-    @Test
     void saveItemTest() {
         Item item = createItem();
         when(itemRepository.save(item))
@@ -108,33 +89,6 @@ class ItemServiceImplTest {
         assertEquals("description1", itemDto.getDescription());
         assertEquals(item.getId(), itemDto.getId());
         verify(itemRepository, times(1)).save(item);
-    }
-
-    @Test
-    void saveCommentForItemTest() {
-        Item item = createItem();
-        User userWriteComment = item.getItemRequest().getUser();
-        Comment comment = createComment(item, userWriteComment);
-        Booking booking = createBooking(item, userWriteComment);
-        when(itemRepository.findById(item.getId()))
-                .thenReturn(Optional.of(item));
-        when(userRepository.findById(userWriteComment.getId()))
-                .thenReturn(Optional.of(userWriteComment));
-        List<Booking> bookingsList = new ArrayList<>();
-        bookingsList.add(booking);
-        when(bookingRepository
-                .searchBookingByBookerIdAndItemIdAndEndIsBeforeAndStatus(anyLong(), anyLong(), any(), any()))
-                .thenReturn(bookingsList);
-        when(commentRepository.save(comment))
-                .thenReturn(comment);
-        CommentDto commentDto1 = toCommentDto(comment);
-        CommentDto commentDto = itemService.saveComment(userWriteComment.getId(), item.getId(),
-                commentDto1);
-        assertNotNull(commentDto);
-        assertEquals("Great", commentDto.getText());
-        assertEquals(userWriteComment.getName(), commentDto.getAuthorName());
-        assertEquals(comment.getId(), commentDto.getId());
-        verify(commentRepository, times(1)).save(any());
     }
 
     @Test

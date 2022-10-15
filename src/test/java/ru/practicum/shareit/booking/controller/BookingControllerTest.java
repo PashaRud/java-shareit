@@ -11,7 +11,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingDto;
 import ru.practicum.shareit.booking.model.BookingDtoSimple;
@@ -30,6 +29,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static ru.practicum.shareit.booking.enums.Status.APPROVED;
 import static ru.practicum.shareit.booking.enums.Status.REJECTED;
+import static ru.practicum.shareit.booking.mapper.BookingMapper.toBookingDto;
 import static ru.practicum.shareit.booking.utils.Utils.toBookingDtoSimple;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,7 +41,6 @@ public class BookingControllerTest {
     private BookingController bookingController;
     private MockMvc mockMvc;
     private ObjectMapper mapper = new ObjectMapper();
-    private BookingMapper bookingMapper = new BookingMapper();
     private Booking booking;
 
     @BeforeEach
@@ -67,7 +66,7 @@ public class BookingControllerTest {
     @Test
     void findAll() throws Exception {
         List<BookingDto> bookingDtos = new ArrayList<>();
-        BookingDto bookingDto = bookingMapper.toBookingDto(booking);
+        BookingDto bookingDto = toBookingDto(booking);
         bookingDtos.add(bookingDto);
         when(bookingService.findAll(bookingDto.getBooker().getId(), "ALL", 0, 20))
                 .thenReturn(bookingDtos);
@@ -90,7 +89,7 @@ public class BookingControllerTest {
     @Test
     void findAllByOwner() throws Exception {
         List<BookingDto> bookingDtos = new ArrayList<>();
-        BookingDto bookingDto = bookingMapper.toBookingDto(booking);
+        BookingDto bookingDto = toBookingDto(booking);
         bookingDtos.add(bookingDto);
         when(bookingService.findAllByItemOwnerId(bookingDto.getItem().getOwner().getId(),
                 "ALL", 0, 20))
@@ -116,7 +115,7 @@ public class BookingControllerTest {
         booking.setStart(LocalDateTime.now().plusDays(1));
         booking.setEnd(LocalDateTime.now().plusDays(2));
         BookingDtoSimple bookingDtoSimple = toBookingDtoSimple(booking);
-        BookingDto bookingDto = bookingMapper.toBookingDto(booking);
+        BookingDto bookingDto = toBookingDto(booking);
         when(bookingService.save(bookingDtoSimple, 2)).thenReturn(bookingDto);
         mockMvc.perform(post("/bookings")
                         .content(mapper.writeValueAsString(bookingDtoSimple))
@@ -138,7 +137,7 @@ public class BookingControllerTest {
     @Test
     void approve() throws Exception {
         booking.setStatus(REJECTED);
-        BookingDto bookingDto = bookingMapper.toBookingDto(booking);
+        BookingDto bookingDto = toBookingDto(booking);
         bookingDto.setStatus(APPROVED);
         when(bookingService.approve(booking.getItem().getOwner().getId(),
                 booking.getId(), true)).thenReturn(bookingDto);
@@ -163,7 +162,7 @@ public class BookingControllerTest {
 
     @Test
     void findById() throws Exception {
-        BookingDto bookingDto = bookingMapper.toBookingDto(booking);
+        BookingDto bookingDto = toBookingDto(booking);
         when(bookingService.findById(booking.getId(), bookingDto.getBooker().getId())).thenReturn(bookingDto);
         mockMvc.perform(get("/bookings/1")
                         .header("X-Sharer-User-Id", bookingDto.getBooker().getId()))

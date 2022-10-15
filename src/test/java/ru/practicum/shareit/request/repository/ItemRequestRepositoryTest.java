@@ -45,9 +45,9 @@ class ItemRequestRepositoryTest {
     }
 
     @Test
-    void findAllByRequestorIdOrderByCreatedDesc() {
+    void findAllByUserIdOrderByCreatedDesc() {
         final List<ItemRequest> requests = itemRequestRepository
-                .findAllByRequestorIdOrderByCreatedDesc(itemRequest.getUser().getId());
+                .findAllByUserIdOrderByCreatedDesc(itemRequest.getUser().getId());
         assertSame(user2, itemRequest.getUser());
         assertNotNull(requests);
         assertEquals(1, requests.size());
