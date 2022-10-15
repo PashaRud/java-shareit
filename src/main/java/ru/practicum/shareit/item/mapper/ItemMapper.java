@@ -18,7 +18,7 @@ public class ItemMapper {
                 item.getAvailable(),
                 null);
         ItemRequest request = item.getItemRequest();
-        if(request != null) {
+        if (request != null) {
             itemDto.setRequestId(request.getId());
         }
         return itemDto;

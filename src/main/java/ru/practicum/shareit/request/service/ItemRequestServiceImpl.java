@@ -12,6 +12,7 @@ import ru.practicum.shareit.request.model.ItemRequestDto;
 import ru.practicum.shareit.request.model.ItemRequestDtoWithItems;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.repository.UserRepository;
+
 import static ru.practicum.shareit.request.mapper.ItemRequestMapper.*;
 
 import java.util.List;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class ItemRequestServiceImpl implements ItemRequestService{
+public class ItemRequestServiceImpl implements ItemRequestService {
 
     private final ItemRequestRepository itemRequestRepository;
     private final ItemRequestMapper mapper;
