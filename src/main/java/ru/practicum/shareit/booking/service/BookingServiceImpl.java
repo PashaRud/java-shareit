@@ -52,18 +52,18 @@ public class BookingServiceImpl implements BookingService {
         try {
             switch (Status.valueOf(state)) {
                 case ALL:
-                    return bookingRepository.findByBookerIdOrderByStartDesc(userId, pageable)
+                    return bookingRepository.findByBookerId(userId, pageable)
                             .stream().map(booking -> toBookingDto(booking)).collect(Collectors.toList());
                 case CURRENT:
-                    return bookingRepository.findCurrentBookingsByBookerIdOrderByStartDesc(userId,
+                    return bookingRepository.findCurrentBookingsByBookerId(userId,
                                     LocalDateTime.now(), pageable).stream().map(booking -> toBookingDto(booking))
                             .collect(Collectors.toList());
                 case PAST:
-                    return bookingRepository.findBookingsByBookerIdAndEndIsBeforeOrderByStartDesc(userId,
+                    return bookingRepository.findBookingsByBookerIdAndEndIsBefore(userId,
                                     LocalDateTime.now(), pageable).stream().map(booking -> toBookingDto(booking))
                             .collect(Collectors.toList());
                 case FUTURE:
-                    return bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(userId,
+                    return bookingRepository.findByBookerIdAndStartAfter(userId,
                                     LocalDateTime.now(), pageable)
                             .stream()
                             .map(booking -> toBookingDto(booking)).collect(Collectors.toList());
@@ -169,23 +169,23 @@ public class BookingServiceImpl implements BookingService {
                     result.sort(Comparator.comparing(BookingDto::getStart).reversed());
                     return result;
                 case CURRENT:
-                    return bookingRepository.findCurrentBookingsByItemOwnerIdOrderByStartDesc(userId,
+                    return bookingRepository.findCurrentBookingsByItemOwnerId(userId,
                                     LocalDateTime.now(), pageable).stream().map(booking -> toBookingDto(booking))
                             .collect(Collectors.toList());
                 case PAST:
-                    return bookingRepository.findBookingsByItemOwnerIdAndEndIsBeforeOrderByStartDesc(userId,
+                    return bookingRepository.findBookingsByItemOwnerIdAndEndIsBefore(userId,
                                     LocalDateTime.now(), pageable).stream().map(booking -> toBookingDto(booking))
                             .collect(Collectors.toList());
                 case FUTURE:
-                    return bookingRepository.searchBookingByItemOwnerIdAndStartIsAfterOrderByStartDesc(userId,
+                    return bookingRepository.searchBookingByItemOwnerIdAndStartIsAfter(userId,
                                     LocalDateTime.now(), pageable).stream().map(booking -> toBookingDto(booking))
                             .collect(Collectors.toList());
                 case WAITING:
-                    return bookingRepository.findBookingsByItemOwnerIdOrderByStartDesc(userId, pageable).stream()
+                    return bookingRepository.findBookingsByItemOwnerId(userId, pageable).stream()
                             .filter(booking -> booking.getStatus().equals(Status.WAITING))
                             .map(booking -> toBookingDto(booking)).collect(Collectors.toList());
                 case REJECTED:
-                    return bookingRepository.findBookingsByItemOwnerIdOrderByStartDesc(userId, pageable).stream()
+                    return bookingRepository.findBookingsByItemOwnerId(userId, pageable).stream()
                             .filter(booking -> booking.getStatus().equals(Status.REJECTED))
                             .map(booking -> toBookingDto(booking)).collect(Collectors.toList());
                 default:

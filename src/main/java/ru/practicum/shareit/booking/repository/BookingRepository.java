@@ -11,15 +11,7 @@ import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
-    List<Booking> findByBookerIdOrderByStartDesc(long userId, Pageable pageable);
-
-    List<Booking> searchBookingByItemOwnerIdOrderByStartDesc(long id, Pageable pageable);
-
-    List<Booking> searchBookingByBookerIdAndItemIdAndEndIsBefore(long id, long itemId, LocalDateTime time);
-
-    List<Booking> searchBookingByItemOwnerIdAndStartIsAfterOrderByStartDesc(long id, LocalDateTime time, Pageable pageable);
-
-    List<Booking> findByBookerIdAndStartAfterOrderByStartDesc(long userId, LocalDateTime time, Pageable pageable);
+    List<Booking> findByBookerId(long userId, Pageable pageable);
 
     List<Booking> findBookingsByItemIdAndEndIsBeforeOrderByEndDesc(long id, LocalDateTime time);
 
@@ -27,30 +19,26 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findBookingsByBookerIdAndStatus(long userId, Status status, Pageable pageable);
 
-    List<Booking> findBookingsByItemOwnerIdOrderByStartDesc(long id, Pageable pageable);
+    List<Booking> findBookingsByItemOwnerId(long id, Pageable pageable);
 
     @Query("select b " +
             "from Booking b left join User as us on b.booker.id = us.id " +
             "where us.id = ?1 " +
-            "and ?2 between b.start and b.end " +
-            "order by b.start DESC")
-    List<Booking> findCurrentBookingsByBookerIdOrderByStartDesc(long userId, LocalDateTime time, Pageable pageable);
+            "and ?2 between b.start and b.end")
+    List<Booking> findCurrentBookingsByBookerId(long userId, LocalDateTime time, Pageable pageable);
 
     @Query("select b " +
             "from Booking b left join Item as i on b.item.id = i.id " +
             "left join User as us on i.owner.id = us.id " +
             "where us.id = ?1 " +
-            "and ?2 between b.start and b.end " +
-            "order by b.start DESC")
-    List<Booking> findCurrentBookingsByItemOwnerIdOrderByStartDesc(long userId, LocalDateTime time, Pageable pageable);
+            "and ?2 between b.start and b.end")
+    List<Booking> findCurrentBookingsByItemOwnerId(long userId, LocalDateTime time, Pageable pageable);
 
-    List<Booking> findBookingsByBookerIdAndEndIsBeforeOrderByStartDesc(long userId, LocalDateTime time,
+    List<Booking> findBookingsByBookerIdAndEndIsBefore(long userId, LocalDateTime time,
                                                                        Pageable pageable);
 
-    List<Booking> findBookingsByItemOwnerIdAndEndIsBeforeOrderByStartDesc(long userId, LocalDateTime time,
+    List<Booking> findBookingsByItemOwnerIdAndEndIsBefore(long userId, LocalDateTime time,
                                                                           Pageable pageable);
-
-    List<Booking> findByBookerId(long userId, Pageable pageable);
 
     List<Booking> searchBookingByItemOwnerId(long id, Pageable pageable);
 

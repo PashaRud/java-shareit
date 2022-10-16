@@ -154,7 +154,7 @@ class BookingRepositoryTest {
     @Test
     void findBookingsByItemOwnerIdTest() {
         final List<Booking> bookings = bookingRepository
-                .findBookingsByItemOwnerIdOrderByStartDesc(item.getOwner().getId(),
+                .findBookingsByItemOwnerId(item.getOwner().getId(),
                         Pageable.unpaged());
         assertNotNull(bookings);
         assertEquals(1, bookings.size());
@@ -169,7 +169,7 @@ class BookingRepositoryTest {
                 LocalDateTime.now().plusDays(10),
                 item, booker, Status.APPROVED));
         bookings = bookingRepository
-                .findCurrentBookingsByBookerIdOrderByStartDesc(booker.getId(),
+                .findCurrentBookingsByBookerId(booker.getId(),
                         LocalDateTime.now(),
                         Pageable.unpaged());
         assertNotNull(bookings);
@@ -185,7 +185,7 @@ class BookingRepositoryTest {
                 LocalDateTime.now().plusDays(10),
                 item, booker, Status.APPROVED));
         bookings = bookingRepository
-                .findCurrentBookingsByItemOwnerIdOrderByStartDesc(item.getOwner().getId(),
+                .findCurrentBookingsByItemOwnerId(item.getOwner().getId(),
                         LocalDateTime.now(),
                         Pageable.unpaged());
         assertNotNull(bookings);
@@ -196,7 +196,7 @@ class BookingRepositoryTest {
     @Test
     void findBookingsByBookerIdAndEndIsBeforeTest() {
         final List<Booking> bookings = bookingRepository
-                .findBookingsByBookerIdAndEndIsBeforeOrderByStartDesc(booker.getId(),
+                .findBookingsByBookerIdAndEndIsBefore(booker.getId(),
                         LocalDateTime.now(),
                         Pageable.unpaged());
         assertNotNull(bookings);
@@ -207,7 +207,7 @@ class BookingRepositoryTest {
     @Test
     void findBookingsByItemOwnerIdAndEndIsBeforeTest() {
         final List<Booking> bookings = bookingRepository
-                .findBookingsByItemOwnerIdAndEndIsBeforeOrderByStartDesc(item.getOwner().getId(),
+                .findBookingsByItemOwnerIdAndEndIsBefore(item.getOwner().getId(),
                         LocalDateTime.now(),
                         Pageable.unpaged());
         assertNotNull(bookings);

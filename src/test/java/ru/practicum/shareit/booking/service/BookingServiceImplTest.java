@@ -87,7 +87,11 @@ class BookingServiceImplTest {
         final List<BookingDto> bookingDtos = bookingService
                 .findAll(booking.getBooker().getId(), "ALL", 0, 20);
         assertNotNull(bookingDtos);
-        assertEquals(0, bookingDtos.size());
+        assertEquals(1, bookingDtos.size());
+        assertEquals(booking.getItem().getName(), bookingDtos.get(0).getItem().getName());
+        verify(bookingRepository, times(1))
+                .findByBookerId(booking.getBooker().getId(),
+                        PageRequest.of(0, 20, Sort.by("start").descending()));
     }
 
     @Test
@@ -135,6 +139,48 @@ class BookingServiceImplTest {
                 () -> bookingService.findAll(booking.getBooker().getId(),
                         incorrectState, 0, 20));
         assertNotNull(thrown.getMessage());
+    }
+
+    @Test
+    void getAllByBookerWithStatePast() {
+        final LocalDateTime date = LocalDateTime.now();
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(booking.getBooker()));
+        when(bookingRepository.findBookingsByBookerIdAndEndIsBefore(anyLong(), any(), any()))
+                .thenReturn(Collections.singletonList(booking));
+        List<BookingDto> bookings = bookingService.findAll(2L, "PAST", 0, 2);
+        assertNotEquals(bookings, null);
+        assertEquals(bookings.size(), 1);
+        assertTrue(bookings.get(0).getEnd().isBefore(date));
+
+        verify(bookingRepository, times(1))
+                .findBookingsByBookerIdAndEndIsBefore(anyLong(), any(), any());
+    }
+
+    @Test
+    void getAllByBookerWithStateFuture() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(booking.getBooker()));
+        when(bookingRepository.findByBookerIdAndStartAfter(anyLong(), any(), any()))
+                .thenReturn(Collections.singletonList(booking));
+        List<BookingDto> bookings = bookingService.findAll(2L, "FUTURE", 0, 2);
+        assertNotEquals(bookings, null);
+        assertEquals(bookings.size(), 1);
+    }
+
+    @Test
+    void getAllByBookerWithStateCurrent() {
+        final LocalDateTime date = LocalDateTime.now();
+        final User owner = new User(1L, "UserName", "user@mail.ru");
+        final User booker = new User(2L, "BookerName", "booker@mail.ru");
+        final Item item = new Item(1L, "ItemName", "ItemDesc", true, owner, null);
+        final Booking currentBooking = new Booking(3L, date.minusDays(1), date.plusDays(100), item, booker, APPROVED);
+
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(booker));
+        when(bookingRepository.findCurrentBookingsByBookerId(anyLong(), any(), any()))
+                .thenReturn(Collections.singletonList(booking));
+
+        List<BookingDto> bookings = bookingService.findAll(2L, "CURRENT", 0, 2);
+        assertNotEquals(bookings, null);
+        assertEquals(bookings.size(), 1);
     }
 
     @Test
@@ -221,5 +267,71 @@ class BookingServiceImplTest {
         verify(bookingRepository, times(1))
                 .searchBookingByItemOwnerId(booking.getItem().getOwner().getId(),
                         PageRequest.of(0, 20, Sort.by("start").descending()));
+    }
+
+    @Test
+    void getAllByOwnerIdWithStateFutureTest() {
+        BookingDto bookingDto = toBookingDto(booking);
+        when(userRepository.findById(booking.getItem().getOwner().getId()))
+                .thenReturn(Optional.of(booking.getBooker()));
+        when(bookingRepository.searchBookingByItemOwnerId(booking.getItem().getOwner().getId(),
+                PageRequest.of(0, 20, Sort.by("start").descending())))
+                .thenReturn(Collections.singletonList(booking));
+        List<BookingDto> bookings = bookingService
+                .findAllByItemOwnerId(booking.getItem().getOwner().getId(),
+                        "FUTURE", 0, 20);
+        assertNotEquals(bookings, null);
+    }
+
+    @Test
+    void getAllByOwnerIdWithStatePastTest() {
+        when(userRepository.findById(booking.getItem().getOwner().getId()))
+                .thenReturn(Optional.of(booking.getBooker()));
+        when(bookingRepository.searchBookingByItemOwnerId(booking.getItem().getOwner().getId(),
+                PageRequest.of(0, 20, Sort.by("start").descending())))
+                .thenReturn(Collections.singletonList(booking));
+        List<BookingDto> bookings = bookingService
+                .findAllByItemOwnerId(booking.getItem().getOwner().getId(),
+                        "PAST", 0, 20);
+        assertNotEquals(bookings, null);
+    }
+
+    @Test
+    void getAllByOwnerIdWithStateWaitingTest() {
+        when(userRepository.findById(booking.getItem().getOwner().getId()))
+                .thenReturn(Optional.of(booking.getBooker()));
+        when(bookingRepository.searchBookingByItemOwnerId(booking.getItem().getOwner().getId(),
+                PageRequest.of(0, 20, Sort.by("start").descending())))
+                .thenReturn(Collections.singletonList(booking));
+        List<BookingDto> bookings = bookingService
+                .findAllByItemOwnerId(booking.getItem().getOwner().getId(),
+                        "WAITING", 0, 20);
+        assertNotEquals(bookings, null);
+    }
+
+    @Test
+    void getAllByOwnerIdWithStateRejectedTest() {
+        when(userRepository.findById(booking.getItem().getOwner().getId()))
+                .thenReturn(Optional.of(booking.getBooker()));
+        when(bookingRepository.searchBookingByItemOwnerId(booking.getItem().getOwner().getId(),
+                PageRequest.of(0, 20, Sort.by("start").descending())))
+                .thenReturn(Collections.singletonList(booking));
+        List<BookingDto> bookings = bookingService
+                .findAllByItemOwnerId(booking.getItem().getOwner().getId(),
+                        "REJECTED", 0, 20);
+        assertNotEquals(bookings, null);
+    }
+
+    @Test
+    void getAllByOwnerIdWithStateCurrentTest() {
+        when(userRepository.findById(booking.getItem().getOwner().getId()))
+                .thenReturn(Optional.of(booking.getBooker()));
+        when(bookingRepository.searchBookingByItemOwnerId(booking.getItem().getOwner().getId(),
+                PageRequest.of(0, 20, Sort.by("start").descending())))
+                .thenReturn(Collections.singletonList(booking));
+        List<BookingDto> bookings = bookingService
+                .findAllByItemOwnerId(booking.getItem().getOwner().getId(),
+                        "CURRENT", 0, 20);
+        assertNotEquals(bookings, null);
     }
 }
