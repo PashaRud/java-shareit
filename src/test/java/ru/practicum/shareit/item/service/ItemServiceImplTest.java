@@ -118,15 +118,6 @@ class ItemServiceImplTest {
         assertNotNull(thrown2.getMessage());
     }
 
-    private Comment createComment(Item item, User user) {
-        return new Comment(1L, "Great", item, user, LocalDateTime.now());
-    }
-
-    private Booking createBooking(Item item, User userWriteComment) {
-        return new Booking(1L, LocalDateTime.now().minusDays(5), LocalDateTime.now().minusDays(2),
-                item, userWriteComment, Status.APPROVED);
-    }
-
     @Test
     void updateItemTest() {
         Item item = createItem();
@@ -143,6 +134,36 @@ class ItemServiceImplTest {
         assertEquals("description1", itemDto.getDescription());
         assertEquals(item.getId(), itemDto.getId());
         verify(itemRepository, times(1)).save(any(Item.class));
+    }
+
+    @Test
+    void updateItemExceptionUserTest() {
+        Item item = createItem();
+        Item item2 = createItem();
+        long itemId = item.getId();
+        long incorrectUserId = 10L;
+        item2.setName("item2");
+        when(itemRepository.save(any(Item.class))).thenReturn(item2);
+        Throwable thrown = assertThrows(StorageException.class,
+                () -> itemService.update(itemMapper.toItemDto(item2),
+                        incorrectUserId,
+                        incorrectUserId));
+        assertNotNull(thrown.getMessage());
+    }
+
+    @Test
+    void updateItemExceptionItemTest() {
+        Item item = createItem();
+        Item item2 = createItem();
+        long itemId = item.getId();
+        long incorrectUserId = 10L;
+        item2.setName("item2");
+        when(itemRepository.save(any(Item.class))).thenReturn(item2);
+        Throwable thrown = assertThrows(StorageException.class,
+                () -> itemService.update(itemMapper.toItemDto(item2),
+                        item.getId(),
+                        incorrectUserId));
+        assertNotNull(thrown.getMessage());
     }
 
     @Test
@@ -210,5 +231,41 @@ class ItemServiceImplTest {
         assertEquals(userWriteComment.getName(), commentDto.getAuthorName());
         assertEquals(comment.getId(), commentDto.getId());
         verify(commentRepository, times(1)).save(any());
+    }
+
+    @Test
+    void saveCommentForItemEmptyCommentTest() {
+        Item item = createItem();
+        User userWriteComment = item.getItemRequest().getUser();
+        Comment comment = createComment(item, userWriteComment);
+        Booking booking = null;
+        when(itemRepository.findById(item.getId()))
+                .thenReturn(Optional.of(item));
+        when(userRepository.findById(userWriteComment.getId()))
+                .thenReturn(Optional.of(userWriteComment));
+        List<Booking> bookingsList = new ArrayList<>();
+        bookingsList.add(booking);
+        when(bookingRepository
+                .searchBookingByBookerIdAndItemIdAndEndIsBeforeAndStatus(anyLong(), anyLong(), any(), any()))
+                .thenReturn(bookingsList);
+        when(commentRepository.save(comment))
+                .thenReturn(comment);
+        CommentDto commentDto1 = toCommentDto(comment);
+        CommentDto commentDto = itemService.saveComment(userWriteComment.getId(), item.getId(),
+                commentDto1);
+        assertNotNull(commentDto);
+        assertEquals("Great", commentDto.getText());
+        assertEquals(userWriteComment.getName(), commentDto.getAuthorName());
+        assertEquals(comment.getId(), commentDto.getId());
+        verify(commentRepository, times(1)).save(any());
+    }
+
+    private Comment createComment(Item item, User user) {
+        return new Comment(1L, "Great", item, user, LocalDateTime.now());
+    }
+
+    private Booking createBooking(Item item, User userWriteComment) {
+        return new Booking(1L, LocalDateTime.now().minusDays(5), LocalDateTime.now().minusDays(2),
+                item, userWriteComment, Status.APPROVED);
     }
 }

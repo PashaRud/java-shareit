@@ -251,6 +251,58 @@ class BookingServiceImplTest {
     }
 
     @Test
+    void approveBookingWithApprovedStateShouldThrowExceptionTest() {
+        final LocalDateTime date = LocalDateTime.now();
+        final User owner = new User(1L, "UserName", "user@mail.ru");
+        final Item item = new Item(1L, "ItemName", "ItemDesc", true, owner, null);
+        Booking bookingNew = new Booking(1L, date.minusDays(1), date.minusHours(1), item, owner, APPROVED);
+        when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(bookingNew));
+        StorageException exception = assertThrows(StorageException.class,
+                () -> bookingService.approve(2L, 1L, true));
+        assertNotNull(exception.getMessage());
+    }
+
+    @Test
+    void approveBookingWhenApproveIsNullShouldThrowExceptionTest() {
+        when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(booking));
+        BookingException exception = assertThrows(BookingException.class,
+                () -> bookingService.approve(1L, 1L, null));
+        assertNotNull(exception.getMessage());
+    }
+
+    @Test
+    void approveBookingBranchesTest() {
+        booking.setStatus(WAITING);
+        when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(booking));
+        when(bookingRepository.save(any())).thenReturn(booking);
+
+        BookingDto bookingApproved = bookingService.approve(booking.getItem().getOwner().getId(), booking.getId(),
+                true);
+        assertEquals(booking.getId(), bookingApproved.getId());
+        assertEquals(booking.getItem().getId(), bookingApproved.getItem().getId());
+        assertEquals(booking.getStart(), bookingApproved.getStart());
+        assertEquals(booking.getEnd(), bookingApproved.getEnd());
+
+        verify(bookingRepository, times(1)).save(any());
+    }
+
+    @Test
+    void rejectBookingTest() {
+        booking.setStatus(WAITING);
+        when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(booking));
+        when(bookingRepository.save(any())).thenReturn(booking);
+
+        BookingDto bookingApproved = bookingService.approve(booking.getItem().getOwner().getId(), booking.getId(),
+                false);
+        assertEquals(booking.getId(), bookingApproved.getId());
+        assertEquals(booking.getItem().getId(), bookingApproved.getItem().getId());
+        assertEquals(booking.getStart(), bookingApproved.getStart());
+        assertEquals(booking.getEnd(), bookingApproved.getEnd());
+
+        verify(bookingRepository, times(1)).save(any());
+    }
+
+    @Test
     void findAllByItemOwnerIdTest() {
         BookingDto bookingDto = toBookingDto(booking);
         when(userRepository.findById(booking.getItem().getOwner().getId()))
@@ -311,6 +363,11 @@ class BookingServiceImplTest {
 
     @Test
     void getAllByOwnerIdWithStateRejectedTest() {
+        String incorrectState = "error";
+        Throwable thrown = assertThrows(StorageException.class,
+                () -> bookingService.findAllByItemOwnerId(booking.getBooker().getId(),
+                        incorrectState, 0, 20));
+        assertNotNull(thrown.getMessage());
         when(userRepository.findById(booking.getItem().getOwner().getId()))
                 .thenReturn(Optional.of(booking.getBooker()));
         when(bookingRepository.searchBookingByItemOwnerId(booking.getItem().getOwner().getId(),
