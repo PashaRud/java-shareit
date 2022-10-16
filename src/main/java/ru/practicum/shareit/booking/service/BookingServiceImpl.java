@@ -3,6 +3,7 @@ package ru.practicum.shareit.booking.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.model.Booking;
@@ -47,7 +48,7 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingDto> findAll(long userId, String state, int from, int size) {
         userRepository.findById(userId).orElseThrow(() -> new StorageException("Incorrect userId"));
         int page = from / size;
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("start").descending());
         try {
             switch (Status.valueOf(state)) {
                 case ALL:
@@ -67,12 +68,12 @@ public class BookingServiceImpl implements BookingService {
                             .stream()
                             .map(booking -> toBookingDto(booking)).collect(Collectors.toList());
                 case WAITING:
-                    return bookingRepository.findBookingsByBookerIdAndStatusOrderByStartDesc(userId,
+                    return bookingRepository.findBookingsByBookerIdAndStatus(userId,
                                     Status.WAITING, pageable)
                             .stream()
                             .map(booking -> toBookingDto(booking)).collect(Collectors.toList());
                 case REJECTED:
-                    return bookingRepository.findBookingsByBookerIdAndStatusOrderByStartDesc(userId,
+                    return bookingRepository.findBookingsByBookerIdAndStatus(userId,
                                     Status.REJECTED, pageable)
                             .stream()
                             .map(booking -> toBookingDto(booking)).collect(Collectors.toList());
@@ -156,8 +157,8 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingDto> findAllByItemOwnerId(long userId, String state, int from, int size) {
         userRepository.findById(userId).orElseThrow(() -> new StorageException("Некорректный id"));
         int page = from / size;
-        Pageable pageable = PageRequest.of(page, size);
-        List<BookingDto> result = bookingRepository.searchBookingByItemOwnerIdOrderByStartDesc(userId, pageable).stream()
+        Pageable pageable = PageRequest.of(page, size, Sort.by("start").descending());
+        List<BookingDto> result = bookingRepository.searchBookingByItemOwnerId(userId, pageable).stream()
                 .map(booking -> toBookingDto(booking)).collect(Collectors.toList());
         if (result.isEmpty()) {
             throw new StorageException("У пользователя нет вещей");

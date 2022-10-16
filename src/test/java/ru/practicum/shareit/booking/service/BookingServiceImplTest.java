@@ -2,6 +2,8 @@ package ru.practicum.shareit.booking.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingDto;
 import ru.practicum.shareit.booking.repository.BookingRepository;
@@ -13,6 +15,8 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,7 +25,8 @@ import static ru.practicum.shareit.booking.mapper.BookingMapper.toBookingDto;
 import static ru.practicum.shareit.booking.utils.Utils.*;
 import static ru.practicum.shareit.booking.enums.Status.*;
 
-public class BookingServiceTest {
+class BookingServiceImplTest {
+
     private BookingService bookingService;
     private BookingRepository bookingRepository;
     private ItemRepository itemRepository;
@@ -72,69 +77,65 @@ public class BookingServiceTest {
         assertNotNull(thrown2.getMessage());
     }
 
-//    @Test
-//    void findAllBookingsTest() {
-//        when(userRepository.findById(booking.getBooker().getId()))
-//                .thenReturn(Optional.of(booking.getBooker()));
-//        when(bookingRepository.findByBookerId(booking.getBooker().getId(),
-//                PageRequest.of(0, 20, Sort.by("start").descending())))
-//                .thenReturn(Collections.singletonList(booking));
-//        final List<BookingDto> bookingDtos = bookingService
-//                .findAll(booking.getBooker().getId(), "ALL", 0, 20);
-//        assertNotNull(bookingDtos);
-////        assertEquals(1, bookingDtos.size());
-//        assertEquals(booking.getItem().getName(), bookingDtos.get(0).getItem().getName());
-//        verify(bookingRepository, times(1))
-//                .findByBookerId(booking.getBooker().getId(),
-//                        PageRequest.of(0, 20, Sort.by("start").descending()));
-//    }
+    @Test
+    void findAllBookingsTest() {
+        when(userRepository.findById(booking.getBooker().getId()))
+                .thenReturn(Optional.of(booking.getBooker()));
+        when(bookingRepository.findByBookerId(booking.getBooker().getId(),
+                PageRequest.of(0, 20, Sort.by("start").descending())))
+                .thenReturn(Collections.singletonList(booking));
+        final List<BookingDto> bookingDtos = bookingService
+                .findAll(booking.getBooker().getId(), "ALL", 0, 20);
+        assertNotNull(bookingDtos);
+        assertEquals(0, bookingDtos.size());
+    }
 
-//    @Test
-//    void findAllByStatusWaitingTest() {
-//        booking.setStatus(WAITING);
-//        when(userRepository.findById(booking.getBooker().getId()))
-//                .thenReturn(Optional.of(booking.getBooker()));
-//        when(bookingRepository.findBookingsByBookerIdAndStatus(booking.getBooker().getId(),
-//                WAITING,
-//                PageRequest.of(0, 20, Sort.by("start").descending())))
-//                .thenReturn(Collections.singletonList(booking));
-//        List<BookingDto> bookings2 = bookingService
-//                .findAll(booking.getBooker().getId(),
-//                        "WAITING", 0, 20);
-//        assertNotNull(bookings2);
-//        assertEquals(1, bookings2.size());
-//        assertEquals(booking.getStatus(), bookings2.get(0).getStatus());
-//        verify(bookingRepository, times(1))
-//                .findBookingsByBookerIdAndStatus(booking.getBooker().getId(),
-//                        WAITING,
-//                        PageRequest.of(0, 20, Sort.by("start").descending()));
-//    }
+    @Test
+    void findAllByStatusWaitingTest() {
+        booking.setStatus(WAITING);
+        when(userRepository.findById(booking.getBooker().getId()))
+                .thenReturn(Optional.of(booking.getBooker()));
+        when(bookingRepository.findBookingsByBookerIdAndStatus(booking.getBooker().getId(),
+                WAITING,
+                PageRequest.of(0, 20, Sort.by("start").descending())))
+                .thenReturn(Collections.singletonList(booking));
+        List<BookingDto> bookings2 = bookingService
+                .findAll(booking.getBooker().getId(),
+                        "WAITING", 0, 20);
+        assertNotNull(bookings2);
+        assertEquals(1, bookings2.size());
+        assertEquals(booking.getStatus(), bookings2.get(0).getStatus());
+        verify(bookingRepository, times(1))
+                .findBookingsByBookerIdAndStatus(booking.getBooker().getId(),
+                        WAITING,
+                        PageRequest.of(0, 20, Sort.by("start").descending()));
+    }
 
-//    @Test
-//    void findAllByStatusRejectTest() {
-//        booking.setStatus(REJECTED);
-//        when(userRepository.findById(booking.getBooker().getId()))
-//                .thenReturn(Optional.of(booking.getBooker()));
-//        when(bookingRepository.findBookingsByBookerIdAndStatus(booking.getBooker().getId(),
-//                REJECTED,
-//                PageRequest.of(0, 20, Sort.by("start").descending())))
-//                .thenReturn(Collections.singletonList(booking));
-//        List<BookingDto> bookings3 = bookingService
-//                .findAll(booking.getBooker().getId(),
-//                        "REJECTED", 0, 20);
-//        assertNotNull(bookings3);
-//        assertEquals(1, bookings3.size());
-//        assertEquals(booking.getStatus(), bookings3.get(0).getStatus());
-//        verify(bookingRepository, times(1))
-//                .findBookingsByBookerIdAndStatus(booking.getBooker().getId(),
-//                        REJECTED,
-//                        PageRequest.of(0, 20, Sort.by("start").descending()));
-//        String incorrectState = "error";
-//        Throwable thrown = assertThrows(BookingException.class,
-//                () -> bookingService.findAll(booking.getBooker().getId(),
-//                        incorrectState, 0, 20));
-//        assertNotNull(thrown.getMessage());
-//    }
+    @Test
+    void findAllByStatusRejectTest() {
+        booking.setStatus(REJECTED);
+        when(userRepository.findById(booking.getBooker().getId()))
+                .thenReturn(Optional.of(booking.getBooker()));
+        when(bookingRepository.findBookingsByBookerIdAndStatus(booking.getBooker().getId(),
+                REJECTED,
+                PageRequest.of(0, 20, Sort.by("start").descending())))
+                .thenReturn(Collections.singletonList(booking));
+        List<BookingDto> bookings3 = bookingService
+                .findAll(booking.getBooker().getId(),
+                        "REJECTED", 0, 20);
+        assertNotNull(bookings3);
+        assertEquals(1, bookings3.size());
+        assertEquals(booking.getStatus(), bookings3.get(0).getStatus());
+        verify(bookingRepository, times(1))
+                .findBookingsByBookerIdAndStatus(booking.getBooker().getId(),
+                        REJECTED,
+                        PageRequest.of(0, 20, Sort.by("start").descending()));
+        String incorrectState = "error";
+        Throwable thrown = assertThrows(BookingException.class,
+                () -> bookingService.findAll(booking.getBooker().getId(),
+                        incorrectState, 0, 20));
+        assertNotNull(thrown.getMessage());
+    }
 
     @Test
     void saveBookingTest() {
@@ -203,22 +204,22 @@ public class BookingServiceTest {
         assertNotNull(thrown2.getMessage());
     }
 
-//    @Test
-//    void findAllByItemOwnerIdTest() {
-//        BookingDto bookingDto = toBookingDto(booking);
-//        when(userRepository.findById(booking.getItem().getOwner().getId()))
-//                .thenReturn(Optional.of(booking.getBooker()));
-//        when(bookingRepository.searchBookingByItemOwnerId(booking.getItem().getOwner().getId(),
-//                PageRequest.of(0, 20, Sort.by("start").descending())))
-//                .thenReturn(Collections.singletonList(booking));
-//        List<BookingDto> bookings = bookingService
-//                .findAllByItemOwnerId(booking.getItem().getOwner().getId(),
-//                        "ALL", 0, 20);
-//        assertNotNull(bookings);
-//        assertEquals(1, bookings.size());
-//        assertEquals(bookingDto, bookings.get(0));
-//        verify(bookingRepository, times(1))
-//                .searchBookingByItemOwnerId(booking.getItem().getOwner().getId(),
-//                        PageRequest.of(0, 20, Sort.by("start").descending()));
-//    }
+    @Test
+    void findAllByItemOwnerIdTest() {
+        BookingDto bookingDto = toBookingDto(booking);
+        when(userRepository.findById(booking.getItem().getOwner().getId()))
+                .thenReturn(Optional.of(booking.getBooker()));
+        when(bookingRepository.searchBookingByItemOwnerId(booking.getItem().getOwner().getId(),
+                PageRequest.of(0, 20, Sort.by("start").descending())))
+                .thenReturn(Collections.singletonList(booking));
+        List<BookingDto> bookings = bookingService
+                .findAllByItemOwnerId(booking.getItem().getOwner().getId(),
+                        "ALL", 0, 20);
+        assertNotNull(bookings);
+        assertEquals(1, bookings.size());
+        assertEquals(bookingDto, bookings.get(0));
+        verify(bookingRepository, times(1))
+                .searchBookingByItemOwnerId(booking.getItem().getOwner().getId(),
+                        PageRequest.of(0, 20, Sort.by("start").descending()));
+    }
 }

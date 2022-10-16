@@ -143,7 +143,7 @@ class BookingRepositoryTest {
     @Test
     void findBookingsByBookerIdAndStatusTest() {
         final List<Booking> bookings = bookingRepository
-                .findBookingsByBookerIdAndStatusOrderByStartDesc(booker.getId(),
+                .findBookingsByBookerIdAndStatus(booker.getId(),
                         Status.APPROVED,
                         Pageable.unpaged());
         assertNotNull(bookings);
