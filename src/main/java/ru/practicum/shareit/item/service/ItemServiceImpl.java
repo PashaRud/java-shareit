@@ -18,6 +18,7 @@ import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
+import javax.validation.ValidationException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -58,6 +59,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDtoWithBooking> findAll(long userId, int from, int size) {
+        if (from < 0 || size <= 0) {
+            throw new ValidationException("Переданы некорректные значения from and size");
+        }
         int page = from / size;
         Pageable pageable = PageRequest.of(page, size);
         List<ItemDtoWithBooking> result = itemRepository.findByOwnerId(userId, pageable).stream()

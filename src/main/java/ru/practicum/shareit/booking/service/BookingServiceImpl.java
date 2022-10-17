@@ -17,6 +17,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.repository.UserRepository;
 
+import javax.validation.ValidationException;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -47,6 +48,9 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingDto> findAll(long userId, String state, int from, int size) {
         userRepository.findById(userId).orElseThrow(() -> new StorageException("Incorrect userId"));
+        if (from < 0 || size <= 0) {
+            throw new ValidationException("Переданы некорректные значения from and size");
+        }
         int page = from / size;
         Pageable pageable = PageRequest.of(page, size, Sort.by("start").descending());
         try {
@@ -156,6 +160,9 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingDto> findAllByItemOwnerId(long userId, String state, int from, int size) {
         userRepository.findById(userId).orElseThrow(() -> new StorageException("Некорректный id"));
+        if (from < 0 || size <= 0) {
+            throw new ValidationException("Переданы некорректные значения from and size");
+        }
         int page = from / size;
         Pageable pageable = PageRequest.of(page, size, Sort.by("start").descending());
         List<BookingDto> result = bookingRepository.searchBookingByItemOwnerId(userId, pageable).stream()

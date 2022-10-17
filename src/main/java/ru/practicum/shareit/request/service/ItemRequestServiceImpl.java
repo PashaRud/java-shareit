@@ -13,6 +13,8 @@ import ru.practicum.shareit.request.model.ItemRequestDtoWithItems;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.repository.UserRepository;
 
+import javax.validation.ValidationException;
+
 import static ru.practicum.shareit.request.mapper.ItemRequestMapper.*;
 
 import java.util.List;
@@ -48,6 +50,9 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public List<ItemRequestDtoWithItems> findAllRequests(long userId, int from, int size) {
+        if (from < 0 || size <= 0) {
+            throw new ValidationException("Переданы некорректные значения from and size");
+        }
         int page = from / size;
         Pageable pageable = PageRequest.of(page, size, Sort.by("created"));
         userRepository.findById(userId).orElseThrow(() ->

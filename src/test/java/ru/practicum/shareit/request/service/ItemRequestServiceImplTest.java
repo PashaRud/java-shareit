@@ -115,4 +115,21 @@ class ItemRequestServiceImplTest {
         verify(itemRequestRepository, times(1))
                 .findAll(PageRequest.of(0, 20, Sort.by("created")));
     }
+
+    @Test
+    void getAllItemRequestsTest() {
+        when(userRepository.findById(itemRequest.getUser().getId()))
+                .thenReturn(Optional.of(itemRequest.getUser()));
+        when(itemRequestRepository
+                .findAllByUserIdOrderByCreatedDesc(itemRequest.getUser().getId()))
+                .thenReturn(Collections.singletonList(itemRequest));
+        final List<ItemRequestDtoWithItems> itemRequestDtoWithItems = itemRequestService
+                .findAll(itemRequest.getUser().getId());
+
+        List<ItemRequestDtoWithItems> dtos = itemRequestService.findAllRequests(itemRequest
+                .getUser().getId(), 0, 10);
+
+        assertNotNull(dtos);
+        assertEquals(1, dtos.size());
+    }
 }
