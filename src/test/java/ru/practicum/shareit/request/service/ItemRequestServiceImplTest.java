@@ -126,10 +126,8 @@ class ItemRequestServiceImplTest {
         final List<ItemRequestDtoWithItems> itemRequestDtoWithItems = itemRequestService
                 .findAll(itemRequest.getUser().getId());
 
-        List<ItemRequestDtoWithItems> dtos = itemRequestService.findAllRequests(itemRequest
-                .getUser().getId(), 0, 10);
+        assertNotNull(itemRequestDtoWithItems);
+        assertEquals(1, itemRequestDtoWithItems.size());
 
-        assertNotNull(dtos);
-        assertEquals(1, dtos.size());
     }
 }
