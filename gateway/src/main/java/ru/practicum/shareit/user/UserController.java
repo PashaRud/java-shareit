@@ -18,31 +18,31 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<Object> findAll() {
-        log.info("Получен запрос к эндпоинту: /users, метод findAll");
+        log.info("Метод Get /users");
         return userClient.getUsers();
     }
 
     @PostMapping
     public ResponseEntity<Object> create(@Valid @RequestBody UserDto userDto) {
-        log.info("Получен запрос к эндпоинту: /users, Пользователь: Имя: " + userDto.getName());
+        log.info("Метод Post /users, Пользователь: {}", userDto.getName());
         return userClient.save(userDto);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Object> findUserById(@PathVariable long id) {
-        log.info("Метод GET с user " + id);
+        log.info("Метод GET с user {}", id);
         return userClient.getUser(id);
     }
 
     @DeleteMapping("/{id}")
     public void deleteUserById(@PathVariable long id) {
-        log.info("Получен запрос к эндпоинту: DELETE /users/id , userId " + id);
+        log.info("Метод DELETE /users/id , userId: {}", id);
         userClient.deleteUser(id);
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<Object> update(@PathVariable long id, @RequestBody UserDto userDto) {
-        log.info("Метод PATCH с user " + id);
+        log.info("Метод PATCH с user: {}", id);
         return userClient.updateUser(id, userDto);
     }
 }

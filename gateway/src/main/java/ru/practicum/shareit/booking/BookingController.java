@@ -32,7 +32,7 @@ public class BookingController {
                                               Integer size) {
         BookingState stateParam = BookingState.from(state)
                 .orElseThrow(() -> new BookingException("Unknown state: " + state));
-        log.info("Get booking with state {}, userId={}, from={}, size={}", state, userId, from, size);
+        log.info("Метод Get booking = state {}, userId={}, from={}, size={}", state, userId, from, size);
         return bookingClient.getBookings(userId, stateParam, from, size);
     }
 
@@ -46,21 +46,21 @@ public class BookingController {
                                                            Integer size) {
         BookingState stateParam = BookingState.from(state)
                 .orElseThrow(() -> new BookingException("Unknown state: " + state));
-        log.info("Get booking with state {}, userId={}, from={}, size={}", state, userId, from, size);
+        log.info("Метод Get booking = state {}, userId={}, from={}, size={}", state, userId, from, size);
         return bookingClient.getBookingsByItemOwnerId(userId, stateParam, from, size);
     }
 
     @PostMapping
     public ResponseEntity<Object> bookItem(@RequestHeader("X-Sharer-User-Id") long userId,
                                            @RequestBody @Valid BookItemRequestDto requestDto) {
-        log.info("Creating booking {}, userId={}", requestDto, userId);
+        log.info("Метод Post booking {}, userId={}", requestDto, userId);
         return bookingClient.bookItem(userId, requestDto);
     }
 
     @GetMapping("/{bookingId}")
     public ResponseEntity<Object> getBooking(@RequestHeader("X-Sharer-User-Id") long userId,
                                              @PathVariable Long bookingId) {
-        log.info("Get booking {}, userId={}", bookingId, userId);
+        log.info("Метод Get booking {}, userId={}", bookingId, userId);
         return bookingClient.getBooking(userId, bookingId);
     }
 
