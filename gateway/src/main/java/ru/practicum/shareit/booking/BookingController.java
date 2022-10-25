@@ -74,6 +74,7 @@ public class BookingController {
 
     @DeleteMapping("/{id}")
     public void deleteById(@PathVariable long id) {
+        log.info("Полечен Delete запрос booking {}", id);
         bookingClient.deleteById(id);
     }
 }
